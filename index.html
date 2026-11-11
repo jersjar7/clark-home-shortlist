@@ -898,7 +898,7 @@ const money = n => "$" + Math.round(n).toLocaleString("en-US");
 const fmtMi = n => n.toFixed(n < 10 ? 1 : 0) + " mi";
 
 /* ---------- shared shortlist state ---------- */
-const API = "__API__";   // Google Apps Script web app URL
+const API = "https://script.google.com/macros/s/AKfycbz3FBZUdntdhEfq4vEsBL4IF-LvTW3qZQswEtf0DpYWs9YMosbld6ZzVAFJHxRAy2W9dg/exec";   // Google Apps Script web app URL
 const PEOPLE = {jerson:"Jerson", melissa:"Melissa"};
 let picks = {};          // person -> {homeId: {v, n}}
 const db = /^https:\/\//.test(API);
