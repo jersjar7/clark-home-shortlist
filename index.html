@@ -812,7 +812,6 @@ dialog h2{margin:0 0 8px;font-family:var(--font-display);font-size:18px}
     <div>
       <h1>Clark County Home Shortlist</h1>
       <div class="sub" id="sub">Homes from your two docs, with distances and estimated monthly payments</div>
-      <label class="who">Picking as <select id="who"><option value="">choose</option><option value="jerson">Jerson</option><option value="melissa">Melissa</option></select></label>
     </div>
     <div class="legend" aria-label="Map legend">
       <span><i class="dot under"></i>At or under $390k</span>
@@ -828,10 +827,10 @@ dialog h2{margin:0 0 8px;font-family:var(--font-display);font-size:18px}
       <div class="filters">
         <div class="chips" role="group" aria-label="Shortlist filter" id="statusChips">
           <button class="chip" data-s="all" aria-pressed="true" type="button">All</button>
-          <button class="chip" data-s="both" aria-pressed="false" type="button">Both said yes</button>
-          <button class="chip" data-s="yes" aria-pressed="false" type="button">Any yes</button>
+          <button class="chip" data-s="yes" aria-pressed="false" type="button">Yes</button>
           <button class="chip" data-s="maybe" aria-pressed="false" type="button">Maybe</button>
-          <button class="chip" data-s="unmarked" aria-pressed="false" type="button">Not reviewed by me</button>
+          <button class="chip" data-s="no" aria-pressed="false" type="button">No</button>
+          <button class="chip" data-s="unmarked" aria-pressed="false" type="button">Not reviewed</button>
         </div>
         <div class="row">
           <label for="fType">Type <select id="fType"><option value="">Any</option><option>House</option><option>Townhome</option><option>Condo</option></select></label>
@@ -902,9 +901,8 @@ const API = "https://script.google.com/macros/s/AKfycbz3FBZUdntdhEfq4vEsBL4IF-Lv
 const PEOPLE = {jerson:"Jerson", melissa:"Melissa"};
 let picks = {};          // person -> {homeId: {v, n}}
 const db = /^https:\/\//.test(API);
-let myId = null; try { myId = localStorage.getItem("hs-who"); } catch(e) {}
-if (!PEOPLE[myId]) myId = null;
-let canWrite = db && !!myId;
+const myId = "jerson";   // one shared set of picks for Jerson and Melissa together
+let canWrite = db;
 const names = {jerson:{name:"Jerson"}, melissa:{name:"Melissa"}};
 function myVote(id){ return myId && picks[myId] && picks[myId][id] ? picks[myId][id] : null; }
 function votesFor(id){ return Object.entries(picks).filter(([u,m]) => m[id] && m[id].v).map(([u,m]) => ({u, v:m[id].v, n:m[id].n||""})); }
@@ -922,6 +920,7 @@ function visible(){
     if (status === "both") { const ys = vs.filter(x=>x.v==="yes"); if (ys.length < 2) return false; }
     if (status === "yes" && !vs.some(x=>x.v==="yes")) return false;
     if (status === "maybe" && !vs.some(x=>x.v==="maybe")) return false;
+    if (status === "no" && !vs.some(x=>x.v==="no")) return false;
     if (status === "unmarked" && myVote(h.id) && myVote(h.id).v) return false;
     return true;
   });
@@ -999,7 +998,7 @@ function onMarker(h){
 /* ---------- list ---------- */
 function voteBadges(id){
   const vs = votesFor(id); if (!vs.length) return "";
-  return `<span class="votes">` + vs.map(x => `<span class="vb ${x.v}" data-u="${x.u}">${initial(x.u)}</span>`).join("") + `</span>`;
+  return `<span class="votes">` + vs.map(x => `<span class="vb ${x.v}" data-u="${x.u}">${x.v === "yes" ? "Yes" : x.v === "maybe" ? "Maybe" : "No"}</span>`).join("") + `</span>`;
 }
 function initial(u){ const n = names[u] && names[u].name; return n ? n.trim()[0].toUpperCase() : (u === myId ? "Me" : "?"); }
 function itemHTML(h){
@@ -1072,7 +1071,7 @@ function renderDetail(){
       <label class="small" for="myNote">Your note</label>
       <textarea id="myNote" ${canWrite?"":"disabled"} placeholder="What stood out?"></textarea>
       <div id="others"></div>
-      ${canWrite ? "" : `<p class="small">${db ? "Choose who is picking at the top of the page to save picks." : "Saving is not set up yet."}</p>`}
+      ${canWrite ? "" : `<p class="small">${db ? "Picks can't be saved right now." : "Saving is not set up yet."}</p>`}
     </div>`;
   $("#dAddr").textContent = `${h.a}, ${h.c} ${h.z}`;
   $("#dNote").textContent = h.note || "";
@@ -1124,10 +1123,6 @@ $("#saveSet").onclick = () => { const n = id => parseFloat($(id).value);
 $("#resetSet").onclick = () => { S = {...DEFAULTS}; fillSet(); };
 renderAll();
 
-$("#who").value = myId || "";
-$("#who").onchange = e => { myId = PEOPLE[e.target.value] ? e.target.value : null; canWrite = db && !!myId;
-  try { myId ? localStorage.setItem("hs-who", myId) : localStorage.removeItem("hs-who"); } catch(err) {} renderAll(); };
-
 async function loadPicks(){
   const st = $("#status");
   if (!db) { st.hidden = false; st.textContent = "Shared picks are not connected yet."; return; }
@@ -1136,8 +1131,8 @@ async function loadPicks(){
     const r = await fetch(API, {cache:"no-store"}); const j = await r.json();
     if (pending) return;
     picks = j.picks || {}; st.hidden = true;
-    const n = Object.values(picks).filter(m => Object.keys(m).length).length;
-    $("#sub").textContent = n ? `Shared shortlist · ${n === 1 ? "1 person" : n+" people"} picking` : "Shared shortlist · tap a home and pick Yes, Maybe or No";
+    const n = Object.values(picks[myId] || {}).filter(e => e.v).length;
+    $("#sub").textContent = n ? `Our shortlist · ${n} of ${HOMES.length} homes marked` : "Our shortlist · tap a home and pick Yes, Maybe or No";
     if (document.activeElement && document.activeElement.id === "myNote") { renderMarkers(); renderList(); } else renderAll();
   } catch(e) { st.hidden = false; st.textContent = "The shared shortlist can't be reached right now. Picks shown may be out of date."; }
 }
