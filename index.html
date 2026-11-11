@@ -1,0 +1,1149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Clark County Home Shortlist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* required styles */
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	}
+.leaflet-container {
+	overflow: hidden;
+	}
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	  -webkit-user-drag: none;
+	}
+/* Prevents IE11 from highlighting tiles in blue */
+.leaflet-tile::selection {
+	background: transparent;
+}
+/* Safari renders non-retina tile on retina better with this, but Chrome is worse */
+.leaflet-safari .leaflet-tile {
+	image-rendering: -webkit-optimize-contrast;
+	}
+/* hack that prevents hw layers "stretching" when loading new tiles */
+.leaflet-safari .leaflet-tile-container {
+	width: 1600px;
+	height: 1600px;
+	-webkit-transform-origin: 0 0;
+	}
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	display: block;
+	}
+/* .leaflet-container svg: reset svg max-width decleration shipped in Joomla! (joomla.org) 3.x */
+/* .leaflet-container img: map is broken in FF if you have max-width: 100% on tiles */
+.leaflet-container .leaflet-overlay-pane svg {
+	max-width: none !important;
+	max-height: none !important;
+	}
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
+	max-width: none !important;
+	max-height: none !important;
+	width: auto;
+	padding: 0;
+	}
+
+.leaflet-container img.leaflet-tile {
+	/* See: https://bugs.chromium.org/p/chromium/issues/detail?id=600120 */
+	mix-blend-mode: plus-lighter;
+}
+
+.leaflet-container.leaflet-touch-zoom {
+	-ms-touch-action: pan-x pan-y;
+	touch-action: pan-x pan-y;
+	}
+.leaflet-container.leaflet-touch-drag {
+	-ms-touch-action: pinch-zoom;
+	/* Fallback for FF which doesn't support pinch-zoom */
+	touch-action: none;
+	touch-action: pinch-zoom;
+}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+	-ms-touch-action: none;
+	touch-action: none;
+}
+.leaflet-container {
+	-webkit-tap-highlight-color: transparent;
+}
+.leaflet-container a {
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+.leaflet-tile {
+	filter: inherit;
+	visibility: hidden;
+	}
+.leaflet-tile-loaded {
+	visibility: inherit;
+	}
+.leaflet-zoom-box {
+	width: 0;
+	height: 0;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	z-index: 800;
+	}
+/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
+.leaflet-overlay-pane svg {
+	-moz-user-select: none;
+	}
+
+.leaflet-pane         { z-index: 400; }
+
+.leaflet-tile-pane    { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane  { z-index: 500; }
+.leaflet-marker-pane  { z-index: 600; }
+.leaflet-tooltip-pane   { z-index: 650; }
+.leaflet-popup-pane   { z-index: 700; }
+
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg    { z-index: 200; }
+
+.leaflet-vml-shape {
+	width: 1px;
+	height: 1px;
+	}
+.lvml {
+	behavior: url(#default#VML);
+	display: inline-block;
+	position: absolute;
+	}
+
+
+/* control positioning */
+
+.leaflet-control {
+	position: relative;
+	z-index: 800;
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+.leaflet-top,
+.leaflet-bottom {
+	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
+	}
+.leaflet-top {
+	top: 0;
+	}
+.leaflet-right {
+	right: 0;
+	}
+.leaflet-bottom {
+	bottom: 0;
+	}
+.leaflet-left {
+	left: 0;
+	}
+.leaflet-control {
+	float: left;
+	clear: both;
+	}
+.leaflet-right .leaflet-control {
+	float: right;
+	}
+.leaflet-top .leaflet-control {
+	margin-top: 10px;
+	}
+.leaflet-bottom .leaflet-control {
+	margin-bottom: 10px;
+	}
+.leaflet-left .leaflet-control {
+	margin-left: 10px;
+	}
+.leaflet-right .leaflet-control {
+	margin-right: 10px;
+	}
+
+
+/* zoom and fade animations */
+
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: opacity 0.2s linear;
+	   -moz-transition: opacity 0.2s linear;
+	        transition: opacity 0.2s linear;
+	}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+	opacity: 1;
+	}
+.leaflet-zoom-animated {
+	-webkit-transform-origin: 0 0;
+	    -ms-transform-origin: 0 0;
+	        transform-origin: 0 0;
+	}
+svg.leaflet-zoom-animated {
+	will-change: transform;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+	-webkit-transition: -webkit-transform 0.25s cubic-bezier(0,0,0.25,1);
+	   -moz-transition:    -moz-transform 0.25s cubic-bezier(0,0,0.25,1);
+	        transition:         transform 0.25s cubic-bezier(0,0,0.25,1);
+	}
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+	-webkit-transition: none;
+	   -moz-transition: none;
+	        transition: none;
+	}
+
+.leaflet-zoom-anim .leaflet-zoom-hide {
+	visibility: hidden;
+	}
+
+
+/* cursors */
+
+.leaflet-interactive {
+	cursor: pointer;
+	}
+.leaflet-grab {
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+	cursor:         grab;
+	}
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-interactive {
+	cursor: crosshair;
+	}
+.leaflet-popup-pane,
+.leaflet-control {
+	cursor: auto;
+	}
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive,
+.leaflet-dragging .leaflet-marker-draggable {
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor:    -moz-grabbing;
+	cursor:         grabbing;
+	}
+
+/* marker & overlays interactivity */
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container {
+	pointer-events: none;
+	}
+
+.leaflet-marker-icon.leaflet-interactive,
+.leaflet-image-layer.leaflet-interactive,
+.leaflet-pane > svg path.leaflet-interactive,
+svg.leaflet-image-layer.leaflet-interactive path {
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+
+/* visual tweaks */
+
+.leaflet-container {
+	background: #ddd;
+	outline-offset: 1px;
+	}
+.leaflet-container a {
+	color: #0078A8;
+	}
+.leaflet-zoom-box {
+	border: 2px dotted #38f;
+	background: rgba(255,255,255,0.5);
+	}
+
+
+/* general typography */
+.leaflet-container {
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	}
+
+
+/* general toolbar styles */
+
+.leaflet-bar {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+	border-radius: 4px;
+	}
+.leaflet-bar a {
+	background-color: #fff;
+	border-bottom: 1px solid #ccc;
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	color: black;
+	}
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+	background-color: #f4f4f4;
+	}
+.leaflet-bar a:first-child {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.leaflet-bar a:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom: none;
+	}
+.leaflet-bar a.leaflet-disabled {
+	cursor: default;
+	background-color: #f4f4f4;
+	color: #bbb;
+	}
+
+.leaflet-touch .leaflet-bar a {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	}
+.leaflet-touch .leaflet-bar a:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	}
+.leaflet-touch .leaflet-bar a:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	}
+
+/* zoom control */
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	font: bold 18px 'Lucida Console', Monaco, monospace;
+	text-indent: 1px;
+	}
+
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
+	font-size: 22px;
+	}
+
+
+/* layers control */
+
+.leaflet-control-layers {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-layers-toggle {
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .leaflet-control-layers-toggle {
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-layers-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+	display: none;
+	}
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-layers-scrollbar {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding-right: 5px;
+	}
+.leaflet-control-layers-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-layers label {
+	display: block;
+	font-size: 13px;
+	font-size: 1.08333em;
+	}
+.leaflet-control-layers-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+
+/* Default icon URLs */
+.leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
+	}
+
+
+/* attribution and scale controls */
+
+.leaflet-container .leaflet-control-attribution {
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	margin: 0;
+	}
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+	padding: 0 5px;
+	color: #333;
+	line-height: 1.4;
+	}
+.leaflet-control-attribution a {
+	text-decoration: none;
+	}
+.leaflet-control-attribution a:hover,
+.leaflet-control-attribution a:focus {
+	text-decoration: underline;
+	}
+.leaflet-attribution-flag {
+	display: inline !important;
+	vertical-align: baseline !important;
+	width: 1em;
+	height: 0.6669em;
+	}
+.leaflet-left .leaflet-control-scale {
+	margin-left: 5px;
+	}
+.leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 5px;
+	}
+.leaflet-control-scale-line {
+	border: 2px solid #777;
+	border-top: none;
+	line-height: 1.1;
+	padding: 2px 5px 1px;
+	white-space: nowrap;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.8);
+	text-shadow: 1px 1px #fff;
+	}
+.leaflet-control-scale-line:not(:first-child) {
+	border-top: 2px solid #777;
+	border-bottom: none;
+	margin-top: -2px;
+	}
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+	border-bottom: 2px solid #777;
+	}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none;
+	}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	border: 2px solid rgba(0,0,0,0.2);
+	background-clip: padding-box;
+	}
+
+
+/* popup */
+
+.leaflet-popup {
+	position: absolute;
+	text-align: center;
+	margin-bottom: 20px;
+	}
+.leaflet-popup-content-wrapper {
+	padding: 1px;
+	text-align: left;
+	border-radius: 12px;
+	}
+.leaflet-popup-content {
+	margin: 13px 24px 13px 20px;
+	line-height: 1.3;
+	font-size: 13px;
+	font-size: 1.08333em;
+	min-height: 1px;
+	}
+.leaflet-popup-content p {
+	margin: 17px 0;
+	margin: 1.3em 0;
+	}
+.leaflet-popup-tip-container {
+	width: 40px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	margin-top: -1px;
+	margin-left: -20px;
+	overflow: hidden;
+	pointer-events: none;
+	}
+.leaflet-popup-tip {
+	width: 17px;
+	height: 17px;
+	padding: 1px;
+
+	margin: -10px auto 0;
+	pointer-events: auto;
+
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+	        transform: rotate(45deg);
+	}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	background: white;
+	color: #333;
+	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+	}
+.leaflet-container a.leaflet-popup-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	text-align: center;
+	width: 24px;
+	height: 24px;
+	font: 16px/24px Tahoma, Verdana, sans-serif;
+	color: #757575;
+	text-decoration: none;
+	background: transparent;
+	}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+	color: #585858;
+	}
+.leaflet-popup-scrolled {
+	overflow: auto;
+	}
+
+.leaflet-oldie .leaflet-popup-content-wrapper {
+	-ms-zoom: 1;
+	}
+.leaflet-oldie .leaflet-popup-tip {
+	width: 24px;
+	margin: 0 auto;
+
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+	}
+
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+	border: 1px solid #999;
+	}
+
+
+/* div icon */
+
+.leaflet-div-icon {
+	background: #fff;
+	border: 1px solid #666;
+	}
+
+
+/* Tooltip */
+/* Base styles for the element that has a tooltip */
+.leaflet-tooltip {
+	position: absolute;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	color: #222;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+	}
+.leaflet-tooltip.leaflet-interactive {
+	cursor: pointer;
+	pointer-events: auto;
+	}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	position: absolute;
+	pointer-events: none;
+	border: 6px solid transparent;
+	background: transparent;
+	content: "";
+	}
+
+/* Directions */
+
+.leaflet-tooltip-bottom {
+	margin-top: 6px;
+}
+.leaflet-tooltip-top {
+	margin-top: -6px;
+}
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-top:before {
+	left: 50%;
+	margin-left: -6px;
+	}
+.leaflet-tooltip-top:before {
+	bottom: 0;
+	margin-bottom: -12px;
+	border-top-color: #fff;
+	}
+.leaflet-tooltip-bottom:before {
+	top: 0;
+	margin-top: -12px;
+	margin-left: -6px;
+	border-bottom-color: #fff;
+	}
+.leaflet-tooltip-left {
+	margin-left: -6px;
+}
+.leaflet-tooltip-right {
+	margin-left: 6px;
+}
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	top: 50%;
+	margin-top: -6px;
+	}
+.leaflet-tooltip-left:before {
+	right: 0;
+	margin-right: -12px;
+	border-left-color: #fff;
+	}
+.leaflet-tooltip-right:before {
+	left: 0;
+	margin-left: -12px;
+	border-right-color: #fff;
+	}
+
+/* Printing */
+
+@media print {
+	/* Prevent printers from removing background-images of controls. */
+	.leaflet-control {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		}
+	}
+
+/* Layout: one-screen map app. Map on the left, list and detail panel on the right; stacks on phones. */
+:root{
+  --bg:#F1F3EE; --surface:#FFFFFF; --surface-2:#F6F7F3; --ink:#1D2623; --muted:#5C6863; --line:#D9DED6;
+  --land:#E6EAE1; --water:#A7C8D6; --road:#FFFFFF; --road-case:#C3C9BF; --hwy:#F2C46D; --hwy-case:#C99536; --label:#55605B;
+  --under:#1F7A6D; --builder:#C2571A; --condo:#6A5AA8; --place:#1D2623;
+  --yes:#2E9450; --maybe:#C9971A; --no:#9AA39E; --over:#B33A2E; --focus:#2563EB;
+  --font-ui:"Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display:"Bricolage Grotesque", "Figtree", ui-sans-serif, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#141A1C; --surface:#1C2427; --surface-2:#222C2F; --ink:#E6ECE9; --muted:#9BA8A3; --line:#33403F;
+  --land:#1A2225; --water:#1F3D4B; --road:#2D383B; --road-case:#232C2F; --hwy:#7C6331; --hwy-case:#5A4722; --label:#8E9B96;
+  --under:#4FC0AE; --builder:#F08A4B; --condo:#A797E8; --place:#F1F5F3;
+  --yes:#4CC77A; --maybe:#E7B93E; --no:#5E6B66; --over:#F07A6C; --focus:#7AA7FF; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#141A1C; --surface:#1C2427; --surface-2:#222C2F; --ink:#E6ECE9; --muted:#9BA8A3; --line:#33403F;
+  --land:#1A2225; --water:#1F3D4B; --road:#2D383B; --road-case:#232C2F; --hwy:#7C6331; --hwy-case:#5A4722; --label:#8E9B96;
+  --under:#4FC0AE; --builder:#F08A4B; --condo:#A797E8; --place:#F1F5F3;
+  --yes:#4CC77A; --maybe:#E7B93E; --no:#5E6B66; --over:#F07A6C; --focus:#7AA7FF; color-scheme:dark; }
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:14px;line-height:1.4}
+*{box-sizing:border-box}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+.app{height:100%;display:flex;flex-direction:column;gap:10px;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.top h1{font-family:var(--font-display);font-size:20px;font-weight:700;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.top .sub{color:var(--muted);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-left:auto;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:11px;height:11px;border-radius:50%;display:inline-block;flex:none}
+.dot.under{background:var(--under)} .dot.builder{background:var(--builder)} .dot.condo{background:var(--condo)}
+.sq{width:11px;height:11px;border-radius:2px;background:var(--place);display:inline-block}
+
+.main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:12px}
+#map{border-radius:12px;border:1px solid var(--line);background:var(--land);min-height:300px}
+.panel{min-width:0;min-height:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+
+.filters{display:flex;flex-direction:column;gap:8px;padding:12px;border-bottom:1px solid var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row label{font-size:12.5px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+select{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:5px 8px;font-size:13px}
+.count{font-size:12.5px;color:var(--muted);margin-left:auto}
+.status{font-size:12.5px;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.status[hidden]{display:none}
+
+#list{list-style:none;margin:0;padding:0;overflow-y:auto;flex:1;min-height:0}
+#list li{border-bottom:1px solid var(--line)}
+.item{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:4px 10px;padding:10px 12px;width:100%;text-align:left;background:none;border:0;cursor:pointer}
+.item:hover{background:var(--surface-2)}
+.item.sel{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--ink)}
+.item .dot{margin-top:5px}
+.item .addr{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.item .price{font-weight:700}
+.item .meta,.item .pay{grid-column:2 / 4;font-size:12.5px;color:var(--muted)}
+.item .pay b{color:var(--ink);font-weight:600}
+.item .pay .over{color:var(--over)}
+.votes{display:inline-flex;gap:4px;margin-left:6px;vertical-align:middle}
+.vb{font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px;color:#fff}
+.vb.yes{background:var(--yes)} .vb.maybe{background:var(--maybe)} .vb.no{background:var(--no)}
+
+#detail{overflow-y:auto;flex:1;min-height:0;padding:14px}
+.back{border:0;background:none;color:var(--muted);cursor:pointer;padding:0;font-size:13px;margin-bottom:8px}
+.dh{font-family:var(--font-display);font-size:19px;font-weight:700;margin:0;letter-spacing:-.01em}
+.dsub{color:var(--muted);margin:2px 0 10px}
+.dprice{font-size:22px;font-weight:700;margin:0 0 10px}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;margin:0 0 12px}
+.facts div{min-width:0}
+.facts dt{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.facts dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.box{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 12px;background:var(--surface-2)}
+.box h3{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.payline{display:flex;justify-content:space-between;gap:8px}
+.payline .big{font-size:18px;font-weight:700}
+.over{color:var(--over)}
+.small{font-size:12.5px;color:var(--muted)}
+.dist{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center}
+.pl{width:20px;height:20px;border-radius:4px;background:var(--place);color:var(--surface);font-size:11px;font-weight:700;display:grid;place-items:center}
+.note{font-size:13px;margin:0 0 12px}
+.link{display:inline-block;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px;margin:0 0 14px}
+.vote{display:flex;gap:6px;margin:6px 0}
+.vote button{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 0;font-weight:600;cursor:pointer}
+.vote button[aria-pressed="true"].yes{background:var(--yes);border-color:var(--yes);color:#fff}
+.vote button[aria-pressed="true"].maybe{background:var(--maybe);border-color:var(--maybe);color:#fff}
+.vote button[aria-pressed="true"].no{background:var(--no);border-color:var(--no);color:#fff}
+.vote button:disabled{opacity:.55;cursor:not-allowed}
+textarea{width:100%;min-height:64px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--surface);resize:vertical}
+.other{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--line)}
+.other img{width:22px;height:22px;border-radius:50%}
+.cluster li{padding:0}
+
+.settings{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:16px;max-width:min(420px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(0,0,0,.35)}
+dialog h2{margin:0 0 8px;font-family:var(--font-display);font-size:18px}
+.form{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center}
+.form input{width:96px;border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:var(--surface-2);text-align:right}
+.btns{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--surface);border-radius:8px;padding:6px 14px;cursor:pointer;font-weight:600}
+.btn.ghost{background:none;color:var(--ink);border-color:var(--line)}
+
+/* map labels */
+.leaflet-container{background:var(--land);font-family:var(--font-ui)}
+.city{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--label);white-space:nowrap;text-shadow:0 0 3px var(--land),0 0 3px var(--land)}
+.hwy{font-size:10px;font-weight:700;color:var(--ink);background:var(--hwy);border:1px solid var(--hwy-case);border-radius:4px;padding:0 4px;white-space:nowrap}
+.place{display:block;white-space:nowrap}
+.place{position:relative;width:22px;height:22px}
+.place span{position:absolute;top:3px}
+.place.right span{left:27px}
+.place.left span{right:27px}
+.place.below span{top:26px;left:50%;transform:translateX(-50%)}
+.place b{width:22px;height:22px;border-radius:5px;background:var(--place);color:var(--land);font-size:12px;display:grid;place-items:center;box-shadow:0 0 0 2px var(--land)}
+.place span{font-size:12px;font-weight:700;color:var(--ink);text-shadow:0 0 3px var(--land),0 0 3px var(--land),0 0 3px var(--land)}
+.leaflet-tooltip{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:none;font-family:var(--font-ui)}
+.leaflet-tooltip-top:before{border-top-color:var(--line)}
+.leaflet-control-zoom a{background:var(--surface)!important;color:var(--ink)!important;border-color:var(--line)!important}
+.attr{position:absolute;right:6px;bottom:4px;z-index:500;font-size:11px;color:#333;background:rgba(255,255,255,.8);padding:1px 6px;border-radius:4px}
+
+@media (max-width: 860px){
+  html,body{height:auto}
+  .app{height:auto}
+  .main{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto}
+  #map{height:52vh}
+  .panel{max-height:none}
+  #list,#detail{overflow:visible}
+  .legend{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.who{display:inline-flex;gap:6px;align-items:center;margin-top:6px;font-size:13px;color:var(--muted,inherit)}
+.who select{font:inherit;padding:2px 6px;border-radius:6px}
+.attr a{color:inherit}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <h1>Clark County Home Shortlist</h1>
+      <div class="sub" id="sub">Homes from your two docs, with distances and estimated monthly payments</div>
+      <label class="who">Picking as <select id="who"><option value="">choose</option><option value="jerson">Jerson</option><option value="melissa">Melissa</option></select></label>
+    </div>
+    <div class="legend" aria-label="Map legend">
+      <span><i class="dot under"></i>At or under $390k</span>
+      <span><i class="dot builder"></i>New build with builder incentive</span>
+      <span><i class="dot condo"></i>Townhouse-style condo</span>
+      <span><i class="sq"></i>Work and daycare</span>
+      <button class="settings" id="openSettings" type="button">Payment assumptions</button>
+    </div>
+  </header>
+  <div class="main">
+    <div id="map" role="region" aria-label="Map of homes"></div>
+    <aside class="panel">
+      <div class="filters">
+        <div class="chips" role="group" aria-label="Shortlist filter" id="statusChips">
+          <button class="chip" data-s="all" aria-pressed="true" type="button">All</button>
+          <button class="chip" data-s="both" aria-pressed="false" type="button">Both said yes</button>
+          <button class="chip" data-s="yes" aria-pressed="false" type="button">Any yes</button>
+          <button class="chip" data-s="maybe" aria-pressed="false" type="button">Maybe</button>
+          <button class="chip" data-s="unmarked" aria-pressed="false" type="button">Not reviewed by me</button>
+        </div>
+        <div class="row">
+          <label for="fType">Type <select id="fType"><option value="">Any</option><option>House</option><option>Townhome</option><option>Condo</option></select></label>
+          <label for="fBeds">Beds <select id="fBeds"><option value="0">Any</option><option value="3">3+</option><option value="4">4+</option></select></label>
+          <label for="fSort">Sort <select id="fSort"><option value="price">Price</option><option value="pay">Monthly payment</option><option value="jw">Near Jerson's office</option><option value="mw">Near Melissa's work</option><option value="dc">Near daycare</option></select></label>
+        </div>
+        <div class="row">
+          <label for="fBudget"><input type="checkbox" id="fBudget"> Only at or under target payment</label>
+          <label for="fHideNo"><input type="checkbox" id="fHideNo" checked> Hide homes marked No</label>
+          <span class="count num" id="count"></span>
+        </div>
+      </div>
+      <div class="status" id="status">Loading your shared shortlist…</div>
+      <div id="detail" hidden></div>
+      <ul id="list"></ul>
+    </aside>
+  </div>
+</div>
+
+<dialog id="settings">
+  <h2>Payment assumptions</h2>
+  <p class="small">Saved in this browser only. Estimates include principal, interest, tax, insurance, PMI and HOA.</p>
+  <form method="dialog" class="form" id="setForm">
+    <label for="sRate">Rate for resale homes (%)</label><input id="sRate" type="number" step="0.05" min="2" max="12">
+    <label for="sBRate">Rate with builder incentive (%)</label><input id="sBRate" type="number" step="0.05" min="2" max="12">
+    <label for="sDown">Down payment (%)</label><input id="sDown" type="number" step="0.5" min="3" max="50">
+    <label for="sTax">Property tax (% per year)</label><input id="sTax" type="number" step="0.05" min="0" max="3">
+    <label for="sIns">Home insurance ($ per year)</label><input id="sIns" type="number" step="50" min="0">
+    <label for="sTarget">Target monthly payment ($)</label><input id="sTarget" type="number" step="50" min="500">
+  </form>
+  <div class="btns"><button class="btn ghost" type="button" id="resetSet">Reset</button><button class="btn" type="button" id="saveSet">Save</button></div>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const HOMES = [{"id":"7026-ne-153rd","a":"7026 NE 153rd Pl","c":"Vancouver","z":"98682","p":319900,"t":"Townhome","bd":3,"ba":2.5,"sf":1360,"yr":2021,"hoa":178,"cat":"under","doc":1,"note":"","lat":45.674412,"lng":-122.515064,"lot":"2,178 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/7026-NE-153rd-Pl-98682/home/173485500"},{"id":"5222-ne-74th","a":"5222 NE 74th Ct","c":"Vancouver","z":"98662","p":329900,"t":"Townhome","bd":3,"ba":2.5,"sf":1601,"yr":2007,"hoa":0,"cat":"under","doc":1,"note":"","lat":45.660323,"lng":-122.597382,"lot":"1,710 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/5222-NE-74th-Ct-98662/home/14698934"},{"id":"2428-ne-113th","a":"2428 NE 113th Ct","c":"Vancouver","z":"98684","p":340200,"t":"House","bd":3,"ba":2.5,"sf":1378,"yr":2007,"hoa":0,"cat":"under","doc":1,"note":"","lat":45.639594,"lng":-122.557654,"lot":"1,574 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/2428-NE-113th-Ct-98684/home/14699800"},{"id":"7147-ne-154th","a":"7147 NE 154th Ave","c":"Vancouver","z":"98682","p":350000,"t":"Townhome","bd":3,"ba":2.5,"sf":1471,"yr":2022,"hoa":150,"cat":"under","doc":1,"note":"","lat":45.675017,"lng":-122.513368,"lot":"4,356 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/7147-NE-154th-Ave-98682/home/175015041"},{"id":"7123-ne-154th","a":"7123 NE 154th Ave","c":"Vancouver","z":"98682","p":350000,"t":"Townhome","bd":3,"ba":2.5,"sf":1472,"yr":2021,"hoa":178,"cat":"under","doc":1,"note":"","lat":45.674751,"lng":-122.513355,"lot":"3,049 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/7123-NE-154th-Ave-98682/home/175015037"},{"id":"627-ne-72nd","a":"627 NE 72nd St","c":"Vancouver","z":"98665","p":350000,"t":"Townhome","bd":3,"ba":2,"sf":1362,"yr":2021,"hoa":191,"cat":"under","doc":1,"note":"","lat":45.673967,"lng":-122.66528,"lot":"1,306 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/627-NE-72nd-St-98665/home/172521143"},{"id":"1209-w-32nd","a":"1209 W 32nd Cir","c":"Vancouver","z":"98660","p":350000,"t":"House","bd":3,"ba":2.5,"sf":1488,"yr":2005,"hoa":0,"cat":"under","doc":1,"note":"","lat":45.644474,"lng":-122.68487,"lot":"4,687 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/1209-W-32nd-Cir-98660/home/14655649"},{"id":"1427-ne-83rd","a":"1427 NE 83rd Dr","c":"Vancouver","z":"98665","p":355000,"t":"House","bd":3,"ba":2.5,"sf":1576,"yr":2023,"hoa":0,"cat":"under","doc":1,"note":"","lat":45.681709,"lng":-122.65717,"lot":"1,800 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/1427-NE-83rd-Dr-98665/home/104470589"},{"id":"10607-ne-120th","a":"10607 NE 120th Pl","c":"Vancouver","z":"98662","p":360000,"t":"Townhome","bd":3,"ba":2.5,"sf":1434,"yr":2024,"hoa":177,"cat":"under","doc":1,"note":"","lat":45.698593,"lng":-122.548715,"lot":"1,742 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Vancouver/10607-NE-120th-Pl-98662/home/185917635"},{"id":"1819-ne-89th","a":"1819 NE 89th Cir","c":"Vancouver","z":"98665","p":360000,"t":"Townhome","bd":3,"ba":2.5,"sf":2020,"yr":2007,"hoa":116,"cat":"under","doc":1,"note":"","lat":45.686673,"lng":-122.653338,"lot":"1,742 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/1819-NE-89th-Cir-98665/home/14699805"},{"id":"13909-ne-7th","a":"13909 NE 7th Ct","c":"Vancouver","z":"98685","p":364000,"t":"Townhome","bd":3,"ba":2.5,"sf":1491,"yr":2003,"hoa":200,"cat":"under","doc":1,"note":"","lat":45.722205,"lng":-122.664615,"lot":"2,178 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/13909-NE-7th-Ct-98685/home/14593084"},{"id":"10903-ne-8th","a":"10903 NE 8th Cir","c":"Vancouver","z":"98664","p":365000,"t":"Townhome","bd":3,"ba":2.5,"sf":2164,"yr":2008,"hoa":119,"cat":"under","doc":1,"note":"","lat":45.626618,"lng":-122.560973,"lot":"2,178 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/10903-NE-8th-Cir-98664/home/14700677"},{"id":"2006-ne-100th","a":"2006 NE 100th Cir","c":"Vancouver","z":"98686","p":365000,"t":"Townhome","bd":3,"ba":2.5,"sf":1525,"yr":2021,"hoa":0,"cat":"under","doc":1,"note":"Short sale, sold as-is (bank-approved).","lat":45.694324,"lng":-122.650442,"lot":"1,848 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/2006-NE-100th-Cir-98686/home/175015298"},{"id":"8517-ne-36th","a":"8517 NE 36th Cir","c":"Vancouver","z":"98662","p":367000,"t":"Townhome","bd":3,"ba":2.5,"sf":1411,"yr":2002,"hoa":0,"cat":"under","doc":1,"note":"","lat":45.647746,"lng":-122.585808,"lot":"2,613 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/8517-NE-36th-Cir-98662/home/14656042"},{"id":"442-ne-71st","a":"442 NE 71st St","c":"Vancouver","z":"98665","p":369900,"t":"Townhome","bd":3,"ba":2.5,"sf":1552,"yr":2020,"hoa":0,"cat":"under","doc":1,"note":"","lat":45.673846,"lng":-122.666861,"lot":"1,970 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/442-NE-71st-St-98665/home/172521215"},{"id":"1952-ne-117th","a":"1952 NE 117th Ct","c":"Vancouver","z":"98684","p":369950,"t":"Townhome","bd":3,"ba":2.5,"sf":1392,"yr":2020,"hoa":203,"cat":"under","doc":1,"note":"","lat":45.636952,"lng":-122.553817,"lot":"2,178 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/1952-NE-117th-Ct-98684/home/167231210"},{"id":"10213-ne-79th","a":"10213 NE 79th Ct","c":"Vancouver","z":"98662","p":370000,"t":"Townhome","bd":3,"ba":2.5,"sf":1522,"yr":2024,"hoa":195,"cat":"under","doc":1,"note":"Assumable loan at 4.5%.","lat":45.695661,"lng":-122.592076,"lot":"2,178 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Vancouver/10213-NE-79th-Ct-98662/home/188537277"},{"id":"2220-ne-141st","a":"2220 NE 141st Way","c":"Vancouver","z":"98686","p":374900,"t":"Townhome","bd":3,"ba":3,"sf":1760,"yr":2004,"hoa":450,"cat":"under","doc":1,"note":"Seller pays for a temporary rate buydown. High HOA.","lat":45.723397,"lng":-122.647797,"lot":"2,178 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/2220-NE-141st-Way-98686/home/14668234"},{"id":"8009-ne-38th","a":"8009 NE 38th Ave","c":"Vancouver","z":"98665","p":375000,"t":"Townhome","bd":3,"ba":2,"sf":1477,"yr":2004,"hoa":238,"cat":"under","doc":1,"note":"","lat":45.680644,"lng":-122.632204,"lot":"2,178 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/8009-NE-38th-Ave-98665/home/14630090"},{"id":"2217-ne-137th","a":"2217 NE 137th Ct","c":"Vancouver","z":"98684","p":375000,"t":"Townhome","bd":3,"ba":2.5,"sf":1518,"yr":2000,"hoa":0,"cat":"under","doc":1,"note":"","lat":45.639134,"lng":-122.531048,"lot":"3,076 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/2217-NE-137th-Ct-98684/home/14673843"},{"id":"2312-ne-80th","a":"2312 NE 80th St","c":"Vancouver","z":"98665","p":379000,"t":"Townhome","bd":3,"ba":2.5,"sf":1882,"yr":2002,"hoa":0,"cat":"under","doc":1,"note":"","lat":45.680355,"lng":-122.647478,"lot":"1,742 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/2312-NE-80th-St-98665/home/14656450"},{"id":"10517-ne-120th","a":"10517 NE 120th Pl","c":"Vancouver","z":"98662","p":379500,"t":"Townhome","bd":3,"ba":2.5,"sf":1541,"yr":2024,"hoa":183,"cat":"under","doc":1,"note":"","lat":45.69829,"lng":-122.548715,"lot":"2,178 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Vancouver/10517-NE-120th-Pl-98662/home/185917630"},{"id":"1925-ne-117th","a":"1925 NE 117th Ct","c":"Vancouver","z":"98684","p":379900,"t":"Townhome","bd":3,"ba":2.5,"sf":1488,"yr":2020,"hoa":203,"cat":"under","doc":1,"note":"","lat":45.636234,"lng":-122.553217,"lot":"2,178 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/1925-NE-117th-Ct-98684/home/167231234"},{"id":"8611-ne-13th","a":"8611 NE 13th Pl","c":"Vancouver","z":"98665","p":379900,"t":"Townhome","bd":3,"ba":2.5,"sf":1934,"yr":2016,"hoa":163,"cat":"under","doc":1,"note":"","lat":45.684844,"lng":-122.658468,"lot":"3,484 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/8611-NE-13th-Pl-98665/home/113682842"},{"id":"1115-w-33rd","a":"1115 W 33rd Way","c":"Vancouver","z":"98660","p":379900,"t":"Townhome","bd":3,"ba":2.5,"sf":1573,"yr":2005,"hoa":0,"cat":"under","doc":1,"note":"","lat":45.645756,"lng":-122.683205,"lot":"3,338 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/1115-W-33rd-Way-98660/home/14667710"},{"id":"6227-ne-51st","a":"6227 NE 51st St","c":"Vancouver","z":"98661","p":379995,"t":"Townhome","bd":3,"ba":2,"sf":1394,"yr":2026,"hoa":230,"cat":"builder","doc":1,"note":"D.R. Horton, Kunze Farms. Flex credit with DHI Mortgage (closing costs or rate buydown).","lat":45.658647,"lng":-122.608381,"lot":"1,742 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/6227-NE-51st-St-98661/home/201055870"},{"id":"11513-ne-32nd","a":"11513 NE 32nd St","c":"Vancouver","z":"98682","p":379999,"t":"Townhome","bd":3,"ba":2.5,"sf":1842,"yr":2000,"hoa":40,"cat":"under","doc":1,"note":"","lat":45.645378,"lng":-122.554521,"lot":"2,613 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/11513-NE-32nd-St-98682/home/14649438"},{"id":"15507-ne-72nd","a":"15507 NE 72nd Way","c":"Vancouver","z":"98682","p":380000,"t":"Townhome","bd":4,"ba":2.5,"sf":1646,"yr":2021,"hoa":179,"cat":"under","doc":1,"note":"","lat":45.675237,"lng":-122.512291,"lot":"2,178 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/15507-NE-72nd-Way-98682/home/175015082"},{"id":"1409-ne-87th","a":"1409 NE 87th Cir","c":"Vancouver","z":"98665","p":385000,"t":"Townhome","bd":3,"ba":2.5,"sf":2184,"yr":2006,"hoa":210,"cat":"under","doc":1,"note":"","lat":45.685466,"lng":-122.657306,"lot":"1,742 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/1409-NE-87th-Cir-98665/home/25758423"},{"id":"13015-ne-26th","a":"13015 NE 26th St","c":"Vancouver","z":"98684","p":385000,"t":"House","bd":3,"ba":2.5,"sf":1643,"yr":2015,"hoa":200,"cat":"under","doc":1,"note":"Seller credit toward closing costs.","lat":45.640654,"lng":-122.539083,"lot":"1,742 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/13015-NE-26th-St-98684/home/62168023"},{"id":"7110-ne-131st","a":"7110 NE 131st St","c":"Vancouver","z":"98686","p":388000,"t":"Townhome","bd":3,"ba":2.5,"sf":1154,"yr":2026,"hoa":0,"cat":"under","doc":1,"note":"New build from a small builder, no rate incentive listed.","lat":45.716706,"lng":-122.599675,"lot":"2,178 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Vancouver/7110-NE-131st-St-98686/home/191437463"},{"id":"11416-ne-122nd","a":"11416 NE 122nd Pl","c":"Vancouver","z":"98682","p":389900,"t":"Townhome","bd":3,"ba":2.5,"sf":1605,"yr":2018,"hoa":213,"cat":"under","doc":1,"note":"","lat":45.704853,"lng":-122.547444,"lot":"2,178 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Vancouver/11416-NE-122nd-Pl-98682/home/113899670"},{"id":"4315-ne-135th","a":"4315 NE 135th Ave","c":"Vancouver","z":"98682","p":389900,"t":"House","bd":3,"ba":2,"sf":1248,"yr":2010,"hoa":0,"cat":"under","doc":1,"note":"","lat":45.653182,"lng":-122.534045,"lot":"3,920 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/4315-NE-135th-Ave-98682/home/28670361"},{"id":"6132-ne-51st","a":"6132 NE 51st St","c":"Vancouver","z":"98661","p":389995,"t":"Townhome","bd":3,"ba":2,"sf":1394,"yr":2026,"hoa":230,"cat":"builder","doc":1,"note":"D.R. Horton, Kunze Farms. Below-market rate plus flex credit with DHI Mortgage.","lat":45.659045,"lng":-122.60901,"lot":"1,742 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/6132-NE-51st-St-98661/home/201055818"},{"id":"13509-ne-86th","a":"13509 NE 86th St","c":"Vancouver","z":"98682","p":399960,"t":"Townhome","bd":3,"ba":2.5,"sf":1520,"yr":2026,"hoa":160,"cat":"builder","doc":1,"note":"Below-market rates and special financing with builder's preferred lender.","lat":45.685299,"lng":-122.533325,"lot":"2,505 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/13509-NE-86th-St-98682/home/197379869"},{"id":"6231-ne-51st","a":"6231 NE 51st St","c":"Vancouver","z":"98661","p":399995,"t":"Townhome","bd":3,"ba":2,"sf":1499,"yr":2026,"hoa":230,"cat":"builder","doc":1,"note":"D.R. Horton, Kunze Farms. Flex credit with DHI Mortgage (closing costs or rate buydown).","lat":45.658647,"lng":-122.608293,"lot":"2,178 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/6231-NE-51st-St-98661/home/201055869"},{"id":"421-sw-31st","a":"421 SW 31st St","c":"Battle Ground","z":"98604","p":399999,"t":"Townhome","bd":3,"ba":2.5,"sf":1722,"yr":2026,"hoa":170,"cat":"builder","doc":1,"note":"Taylor Morrison, Woodin Creek Station. Reduced fixed rate with Taylor Morrison Home Funding through 12/31/2026.","lat":45.757947,"lng":-122.541578,"lot":"2,178 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Battle-Ground/421-SW-31st-St-98604/home/191009011"},{"id":"444-sw-32nd","a":"444 SW 32nd St","c":"Battle Ground","z":"98604","p":404999,"t":"Townhome","bd":3,"ba":2.5,"sf":1722,"yr":2026,"hoa":170,"cat":"builder","doc":1,"note":"Taylor Morrison, Woodin Creek Station. Reduced fixed rate with Taylor Morrison Home Funding through 12/31/2026.","lat":45.757643,"lng":-122.541997,"lot":"2,178 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Battle-Ground/444-SW-32nd-St-98604/home/191008995"},{"id":"18621-ne-44th","a":"18621 NE 44th Ave (Lot 381)","c":"Vancouver","z":"98686","p":409960,"t":"Townhome","bd":3,"ba":2.5,"sf":1626,"yr":2026,"hoa":156,"cat":"builder","doc":1,"note":"Ramble Creek. Listing advertises below-market rates.","lat":45.756326,"lng":-122.626072,"lot":"2,178 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Vancouver/18621-NE-44th-Ave-98686/unit-381/home/204591776"},{"id":"6223-ne-51st","a":"6223 NE 51st St","c":"Vancouver","z":"98661","p":409995,"t":"Townhome","bd":3,"ba":2,"sf":1394,"yr":2026,"hoa":230,"cat":"builder","doc":1,"note":"D.R. Horton, Kunze Farms. Flex credit with DHI Mortgage (closing costs or rate buydown).","lat":45.658645,"lng":-122.608458,"lot":"1,742 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/6223-NE-51st-St-98661/home/201055871"},{"id":"6239-ne-51st","a":"6239 NE 51st St","c":"Vancouver","z":"98661","p":409995,"t":"Townhome","bd":3,"ba":2,"sf":1394,"yr":2026,"hoa":230,"cat":"builder","doc":1,"note":"D.R. Horton, Kunze Farms. Flex credit with DHI Mortgage (closing costs or rate buydown). Builder site shows $414,995.","lat":45.658648,"lng":-122.608098,"lot":"1,742 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/6239-NE-51st-St-98661/home/201055867"},{"id":"417-sw-31st","a":"417 SW 31st St","c":"Battle Ground","z":"98604","p":409999,"t":"Townhome","bd":3,"ba":2.5,"sf":1720,"yr":2026,"hoa":170,"cat":"builder","doc":1,"note":"Taylor Morrison, Woodin Creek Station. Reduced fixed rate with Taylor Morrison Home Funding through 12/31/2026.","lat":45.757951,"lng":-122.541496,"lot":"2,613 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Battle-Ground/417-SW-31st-St-98604/home/191009010"},{"id":"6128-ne-51st","a":"6128 NE 51st St","c":"Vancouver","z":"98661","p":414995,"t":"Townhome","bd":3,"ba":2,"sf":1481,"yr":2026,"hoa":230,"cat":"builder","doc":1,"note":"D.R. Horton, Kunze Farms. Below-market rate plus flex credit with DHI Mortgage. Builder site shows $434,995.","lat":45.658977,"lng":-122.609059,"lot":"2,178 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/6128-NE-51st-St-98661/home/201055817"},{"id":"6219-ne-51st","a":"6219 NE 51st St","c":"Vancouver","z":"98661","p":419995,"t":"Townhome","bd":4,"ba":2,"sf":1499,"yr":2026,"hoa":230,"cat":"builder","doc":1,"note":"D.R. Horton, Kunze Farms. Flex credit with DHI Mortgage (closing costs or rate buydown).","lat":45.658646,"lng":-122.608551,"lot":"2,178 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/6219-NE-51st-St-98661/home/201055872"},{"id":"18607-ne-44th","a":"18607 NE 44th Ave (Lot 374)","c":"Vancouver","z":"98686","p":424960,"t":"Townhome","bd":3,"ba":2.5,"sf":1547,"yr":2025,"hoa":156,"cat":"builder","doc":1,"note":"Ramble Creek. Listing advertises below-market rates. Builder site no longer lists Lots 374 and 348, so they may be sold.","lat":45.755897,"lng":-122.625998,"lot":"2,613 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Vancouver/18607-NE-44th-Ave-98686/unit-374/home/206150831"},{"id":"6243-ne-51st","a":"6243 NE 51st St","c":"Vancouver","z":"98661","p":424995,"t":"Townhome","bd":4,"ba":2,"sf":1481,"yr":2026,"hoa":230,"cat":"builder","doc":1,"note":"D.R. Horton, Kunze Farms. Flex credit with DHI Mortgage (closing costs or rate buydown). No longer on builder site, may be sold.","lat":45.65869,"lng":-122.608019,"lot":"2,613 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/6243-NE-51st-St-98661/home/201055866"},{"id":"1810-nw-18th","a":"1810 NW 18th St","c":"Battle Ground","z":"98604","p":429900,"t":"Townhome","bd":3,"ba":2,"sf":1168,"yr":2025,"hoa":150,"cat":"builder","doc":1,"note":"New Tradition Homes, Amira's Song. Rate buydown NOT confirmed: the builder's only published offer is $3,000 for military, fire and police.","lat":45.793544,"lng":-122.55731,"lot":"3,049 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Battle-Ground/1810-NW-18th-St-98604/home/189802342"},{"id":"18618-ne-45th","a":"18618 NE 45th Ave (Lot 348)","c":"Vancouver","z":"98686","p":429960,"t":"Townhome","bd":3,"ba":2.5,"sf":1547,"yr":2025,"hoa":156,"cat":"builder","doc":1,"note":"Ramble Creek. Listing advertises below-market rates. Builder site no longer lists Lots 374 and 348, so they may be sold.","lat":45.756336,"lng":-122.625604,"lot":"2,613 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Vancouver/18618-NE-45th-Ave-98686/unit-348/home/202306991"},{"id":"6235-ne-51st","a":"6235 NE 51st St","c":"Vancouver","z":"98661","p":434995,"t":"Townhome","bd":3,"ba":2,"sf":1481,"yr":2026,"hoa":230,"cat":"builder","doc":1,"note":"D.R. Horton, Kunze Farms. Flex credit with DHI Mortgage (closing costs or rate buydown).","lat":45.658648,"lng":-122.608191,"lot":"2,178 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/6235-NE-51st-St-98661/home/201055868"},{"id":"1722-nw-18th","a":"1722 NW 18th St","c":"Battle Ground","z":"98604","p":439900,"t":"House","bd":3,"ba":2.5,"sf":1447,"yr":2025,"hoa":0,"cat":"builder","doc":1,"note":"New Tradition Homes, Amira's Song. Rate buydown NOT confirmed: the builder's only published offer is $3,000 for military, fire and police.","lat":45.793555,"lng":-122.556367,"lot":"","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Battle-Ground/1722-NW-18th-St-98604/home/189802333"},{"id":"8613-ne-136th","a":"8613 NE 136th Ave #137","c":"Vancouver","z":"98682","p":439960,"t":"Townhome","bd":3,"ba":2.5,"sf":1634,"yr":2026,"hoa":160,"cat":"builder","doc":1,"note":"Holt, Stone's Throw. Below-market rates with builder's preferred lender.","lat":45.703248,"lng":-122.533214,"lot":"3,484 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Vancouver/8613-NE-136th-Ave-98682/unit-137/home/202246280"},{"id":"18617-ne-44th","a":"18617 NE 44th Ave (Lot 379)","c":"Vancouver","z":"98686","p":439960,"t":"Townhome","bd":3,"ba":2.5,"sf":1547,"yr":2026,"hoa":156,"cat":"builder","doc":1,"note":"Ramble Creek. Listing advertises below-market rates.","lat":45.756211,"lng":-122.62605,"lot":"2,613 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Vancouver/18617-NE-44th-Ave-98686/unit-379/home/205647082"},{"id":"11109-se-20th","a":"11109 SE 20th Cir","c":"Vancouver","z":"98664","p":439995,"t":"House","bd":4,"ba":2,"sf":1484,"yr":2026,"hoa":0,"cat":"builder","doc":1,"note":"D.R. Horton, Oakpointe Crossing. Below-market rate plus flex credit with builder's lender.","lat":45.606349,"lng":-122.558274,"lot":"","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/11109-SE-20th-Cir-98664/home/199214269"},{"id":"1735-nw-18th","a":"1735 NW 18th Way","c":"Battle Ground","z":"98604","p":449900,"t":"Townhome","bd":3,"ba":2.5,"sf":1585,"yr":2025,"hoa":150,"cat":"builder","doc":1,"note":"New Tradition Homes, Amira's Song. Rate buydown NOT confirmed: the builder's only published offer is $3,000 for military, fire and police.","lat":45.793833,"lng":-122.556496,"lot":"3,049 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Battle-Ground/1735-NW-18th-Way-98604/home/189802327"},{"id":"1836-nw-17th","a":"1836 NW 17th Pl","c":"Battle Ground","z":"98604","p":449900,"t":"Townhome","bd":3,"ba":2,"sf":1170,"yr":2026,"hoa":150,"cat":"builder","doc":1,"note":"New Tradition Homes, Amira's Song. Rate buydown NOT confirmed: the builder's only published offer is $3,000 for military, fire and police.","lat":45.793653,"lng":-122.555808,"lot":"3,049 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Battle-Ground/1836-NW-17th-Pl-98604/home/189802359"},{"id":"1845-nw-17th","a":"1845 NW 17th Pl","c":"Battle Ground","z":"98604","p":449900,"t":"Townhome","bd":3,"ba":2,"sf":1170,"yr":2026,"hoa":150,"cat":"builder","doc":1,"note":"New Tradition Homes, Amira's Song. Rate buydown NOT confirmed: the builder's only published offer is $3,000 for military, fire and police.","lat":45.793734,"lng":-122.555808,"lot":"3,049 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Battle-Ground/1845-NW-17th-Pl-98604/home/189802358"},{"id":"6319-ne-51st","a":"6319 NE 51st Loop","c":"Vancouver","z":"98661","p":449995,"t":"House","bd":3,"ba":2,"sf":1400,"yr":2026,"hoa":80,"cat":"builder","doc":1,"note":"D.R. Horton, Kunze Farms. Below-market rate plus flex credit with DHI Mortgage.","lat":45.658314,"lng":-122.606653,"lot":"3,049 sq ft","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/6319-NE-51st-Loop-98661/home/201055856"},{"id":"11113-se-20th","a":"11113 SE 20th Cir","c":"Vancouver","z":"98664","p":449995,"t":"House","bd":3,"ba":2,"sf":1484,"yr":2026,"hoa":99,"cat":"builder","doc":1,"note":"D.R. Horton, Oakpointe Crossing. Below-market rate plus flex credit with builder's lender.","lat":45.606326,"lng":-122.55807,"lot":"3,049 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/11113-SE-20th-Cir-98664/home/199214271"},{"id":"11115-se-20th","a":"11115 SE 20th Cir","c":"Vancouver","z":"98664","p":449995,"t":"House","bd":4,"ba":2,"sf":1484,"yr":2026,"hoa":99,"cat":"builder","doc":1,"note":"D.R. Horton, Oakpointe Crossing. Below-market rate plus flex credit with builder's lender. Builder site shows $500,365, over budget.","lat":45.606316,"lng":-122.557963,"lot":"3,484 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/11115-SE-20th-Cir-98664/home/199214272"},{"id":"11202-se-20th","a":"11202 SE 20th Cir","c":"Vancouver","z":"98664","p":449995,"t":"House","bd":3,"ba":2,"sf":1484,"yr":2026,"hoa":99,"cat":"builder","doc":1,"note":"D.R. Horton, Oakpointe Crossing. Below-market rate plus flex credit with builder's lender.","lat":45.60674,"lng":-122.55777,"lot":"2,178 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/11202-SE-20th-Cir-98664/home/199214280"},{"id":"11206-se-20th","a":"11206 SE 20th Cir","c":"Vancouver","z":"98664","p":449995,"t":"House","bd":4,"ba":2,"sf":1484,"yr":2026,"hoa":99,"cat":"builder","doc":1,"note":"D.R. Horton, Oakpointe Crossing. Below-market rate plus flex credit with builder's lender.","lat":45.606734,"lng":-122.557533,"lot":"4,356 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/11206-SE-20th-Cir-98664/home/199214278"},{"id":"430-sw-32nd","a":"430 SW 32nd St","c":"Battle Ground","z":"98604","p":449999,"t":"Townhome","bd":4,"ba":3,"sf":1994,"yr":2025,"hoa":170,"cat":"builder","doc":1,"note":"Taylor Morrison, Woodin Creek Station. Reduced fixed rate with Taylor Morrison Home Funding through 12/31/2026.","lat":45.757639,"lng":-122.541723,"lot":"2,613 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Battle-Ground/430-SW-32nd-St-98604/home/191008998"},{"id":"12021-se-5th","a":"12021 SE 5th St","c":"Vancouver","z":"98683","p":349900,"t":"Townhome","bd":3,"ba":2.5,"sf":1470,"yr":2021,"hoa":398,"cat":"under","doc":2,"note":"Found on Realtor.com. Price cut $54k.","lat":45.61815,"lng":-122.548735,"lot":"2,050 sq ft","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/12021-SE-5th-St-98683/home/176713390"},{"id":"970-ne-14th","a":"970 NE 14th St","c":"Battle Ground","z":"98604","p":399900,"t":"Townhome","bd":3,"ba":2,"sf":1382,"yr":2024,"hoa":178,"cat":"builder","doc":2,"note":"LGI Homes, Beverly. LGI advertises rate incentives on select inventory and builder-paid closing costs. Built 2024, so confirm it is LGI inventory and not a resale.","lat":45.791627,"lng":-122.527913,"lot":"1,988 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Battle-Ground/970-NE-14th-St-98604/home/189802640"},{"id":"1328-ne-clark","a":"1328 NE Clark Ave","c":"Battle Ground","z":"98604","p":448900,"t":"House","bd":3,"ba":2,"sf":1112,"yr":2025,"hoa":86,"cat":"builder","doc":2,"note":"LGI Homes, Beverly (Chimera plan). LGI shows rate incentives, builder-paid closing costs and this plan from $419,900.","lat":45.790538,"lng":-122.530554,"lot":"3,049 sq ft","sd":"Battle Ground School District","url":"https://www.redfin.com/WA/Battle-Ground/1328-NE-Clark-Ave-98604/home/189802564"},{"id":"4000-ne-109th","a":"4000 NE 109th Ave #Y123","c":"Vancouver","z":"98682","p":264500,"t":"Condo","bd":3,"ba":2,"sf":1018,"yr":2006,"hoa":361,"cat":"condo","doc":2,"note":"Townhouse-style condo. Lender must approve the HOA.","lat":45.649876,"lng":-122.564757,"lot":"","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/4000-NE-109th-Ave-98682/unit-Y123/home/14579972"},{"id":"17410-se-17th","a":"17410 SE 17th Way","c":"Vancouver","z":"98683","p":309900,"t":"Condo","bd":3,"ba":2.5,"sf":1288,"yr":1998,"hoa":358,"cat":"condo","doc":2,"note":"Townhouse-style condo. Lender must approve the HOA.","lat":45.608831,"lng":-122.493184,"lot":"","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/17410-SE-17th-Way-98683/home/14633724"},{"id":"3521-ne-83rd","a":"3521 NE 83rd Ave","c":"Vancouver","z":"98662","p":339000,"t":"Condo","bd":3,"ba":2.5,"sf":1952,"yr":1978,"hoa":427,"cat":"condo","doc":2,"note":"Townhouse-style condo. Lender must approve the HOA.","lat":45.647929,"lng":-122.587548,"lot":"","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/3521-NE-83rd-Ave-98662/home/14611720"},{"id":"3607-ne-83rd","a":"3607 NE 83rd Ave","c":"Vancouver","z":"98662","p":344900,"t":"Condo","bd":3,"ba":2.5,"sf":1807,"yr":1978,"hoa":427,"cat":"condo","doc":2,"note":"Townhouse-style condo. Lender must approve the HOA.","lat":45.648269,"lng":-122.587465,"lot":"","sd":"Vancouver School District","url":"https://www.redfin.com/WA/Vancouver/3607-NE-83rd-Ave-98662/home/14573583"},{"id":"13509-ne-19th","a":"13509 NE 19th St","c":"Vancouver","z":"98684","p":350000,"t":"Condo","bd":3,"ba":2,"sf":1386,"yr":1969,"hoa":175,"cat":"condo","doc":2,"note":"Condo in an 8-unit community. Lender must approve the HOA.","lat":45.63633,"lng":-122.53356,"lot":"","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/13509-NE-19th-St-98684/home/14649081"},{"id":"17412-se-15th","a":"17412 SE 15th Way #8","c":"Vancouver","z":"98683","p":364900,"t":"Condo","bd":3,"ba":2.5,"sf":1431,"yr":1998,"hoa":380,"cat":"condo","doc":2,"note":"Townhouse-style condo. Lender must approve the HOA.","lat":45.609939,"lng":-122.493464,"lot":"","sd":"Evergreen School District","url":"https://www.redfin.com/WA/Vancouver/17412-SE-15th-Way-98683/unit-8/home/192048707"},{"id":"2327-ash","a":"2327 Ash St","c":"Woodland","z":"98674","p":418900,"t":"House","bd":3,"ba":2.5,"sf":1987,"yr":2026,"hoa":76,"cat":"builder","doc":2,"note":"Lennar, Alder & Ash, move-in ready. Lennar Mortgage promotions. NOTE: in Woodland, Cowlitz County (outside Clark County). $74k price cut.","lat":45.929401,"lng":-122.725428,"lot":"4,791 sq ft","sd":"Woodland School District","url":"https://www.lennar.com/new-homes/washington/vancouver/woodland/alder-ash/charlotte/70195510108"},{"id":"2325-ash","a":"2325 Ash St","c":"Woodland","z":"98674","p":439900,"t":"House","bd":4,"ba":3.5,"sf":1975,"yr":2026,"hoa":76,"cat":"builder","doc":2,"note":"Lennar, Alder & Ash, move-in ready. Lennar Mortgage promotions. NOTE: in Woodland, Cowlitz County (outside Clark County). $60k price cut.","lat":45.928801,"lng":-122.724228,"lot":"4,791 sq ft","sd":"Woodland School District","url":"https://www.lennar.com/new-homes/washington/vancouver/woodland/alder-ash/aubrey/70195510107"},{"id":"2315-ash","a":"2315 Ash St","c":"Woodland","z":"98674","p":446400,"t":"House","bd":3,"ba":2.5,"sf":1987,"yr":2026,"hoa":76,"cat":"builder","doc":2,"note":"Lennar, Alder & Ash, move-in ready. Lennar Mortgage promotions. NOTE: in Woodland, Cowlitz County (outside Clark County). $50k price cut.","lat":45.928201,"lng":-122.725428,"lot":"","sd":"Woodland School District","url":"https://www.lennar.com/new-homes/washington/vancouver/woodland/alder-ash/charlotte/70195510102"}];
+const PLACES = [
+  {id:"jw", pos:"left", short:"J", name:"Jerson work", addr:"Approximate location", lat:45.62, lng:-122.63},
+  {id:"mw", pos:"right", short:"M", name:"Melissa work", addr:"Approximate location", lat:45.64, lng:-122.61},
+  {id:"dc", pos:"below", short:"D", name:"Daycare", addr:"Approximate location", lat:45.62, lng:-122.58}
+];
+const CAT_LABEL = {under:"At or under $390k", builder:"New build with builder incentive", condo:"Townhouse-style condo"};
+const DEFAULTS = {rate:7.0, brate:5.5, down:3, tax:0.9, ins:1400, target:3000};
+
+/* ---------- settings (per viewer) ---------- */
+let S = {...DEFAULTS};
+try { const s = JSON.parse(localStorage.getItem("hs-settings")||"null"); if (s) S = {...DEFAULTS, ...s}; } catch(e) {}
+function saveSettings(){ try { localStorage.setItem("hs-settings", JSON.stringify(S)); } catch(e) {} }
+
+/* ---------- math ---------- */
+function monthly(h, rate){
+  const loan = h.p * (1 - S.down/100), i = rate/100/12, n = 360;
+  const pi = loan * i / (1 - Math.pow(1+i, -n));
+  const tax = h.p * S.tax/100/12, ins = S.ins/12, pmi = S.down < 20 ? loan*0.0035/12 : 0;
+  return pi + tax + ins + pmi + (h.hoa||0);
+}
+function primaryRate(h){ return h.cat === "builder" ? S.brate : S.rate; }
+function pay(h){ return monthly(h, primaryRate(h)); }
+function miles(a,b){ const R=3958.8, t=x=>x*Math.PI/180; const dLat=t(b.lat-a.lat), dLng=t(b.lng-a.lng);
+  const q=Math.sin(dLat/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dLng/2)**2; return 2*R*Math.asin(Math.sqrt(q)); }
+HOMES.forEach(h => { h.d = {}; PLACES.forEach(p => h.d[p.id] = miles(h,p)); });
+const $ = s => document.querySelector(s);
+const money = n => "$" + Math.round(n).toLocaleString("en-US");
+const fmtMi = n => n.toFixed(n < 10 ? 1 : 0) + " mi";
+
+/* ---------- shared shortlist state ---------- */
+const API = "__API__";   // Google Apps Script web app URL
+const PEOPLE = {jerson:"Jerson", melissa:"Melissa"};
+let picks = {};          // person -> {homeId: {v, n}}
+const db = /^https:\/\//.test(API);
+let myId = null; try { myId = localStorage.getItem("hs-who"); } catch(e) {}
+if (!PEOPLE[myId]) myId = null;
+let canWrite = db && !!myId;
+const names = {jerson:{name:"Jerson"}, melissa:{name:"Melissa"}};
+function myVote(id){ return myId && picks[myId] && picks[myId][id] ? picks[myId][id] : null; }
+function votesFor(id){ return Object.entries(picks).filter(([u,m]) => m[id] && m[id].v).map(([u,m]) => ({u, v:m[id].v, n:m[id].n||""})); }
+
+/* ---------- filters ---------- */
+let status = "all", selected = null, clusterIds = null;
+function visible(){
+  const t = $("#fType").value, beds = +$("#fBeds").value, budget = $("#fBudget").checked, hideNo = $("#fHideNo").checked;
+  let list = HOMES.filter(h => {
+    if (t && h.t !== t) return false;
+    if (beds && h.bd < beds) return false;
+    if (budget && pay(h) > S.target) return false;
+    const vs = votesFor(h.id);
+    if (hideNo && vs.some(x => x.v === "no")) return false;
+    if (status === "both") { const ys = vs.filter(x=>x.v==="yes"); if (ys.length < 2) return false; }
+    if (status === "yes" && !vs.some(x=>x.v==="yes")) return false;
+    if (status === "maybe" && !vs.some(x=>x.v==="maybe")) return false;
+    if (status === "unmarked" && myVote(h.id) && myVote(h.id).v) return false;
+    return true;
+  });
+  const k = $("#fSort").value;
+  list.sort((a,b) => k==="price" ? a.p-b.p : k==="pay" ? pay(a)-pay(b) : a.d[k]-b.d[k]);
+  return list;
+}
+
+/* ---------- map ---------- */
+const map = L.map("map", {zoomControl:true, attributionControl:false, minZoom:10, maxZoom:19, zoomSnap:0.5,
+  maxBounds:[[45.50,-122.90],[46.00,-122.30]], maxBoundsViscosity:0.8});
+const tok = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const WATER = [
+  {w:11, pts:[[45.565,-122.36],[45.568,-122.42],[45.566,-122.463],[45.570,-122.527],[45.580,-122.555],[45.590,-122.585],[45.598,-122.612],[45.604,-122.640],[45.603,-122.659],[45.609,-122.687],[45.620,-122.715],[45.629,-122.730],[45.638,-122.743],[45.649,-122.753],[45.659,-122.763],[45.677,-122.772],[45.689,-122.772],[45.733,-122.761],[45.761,-122.763],[45.791,-122.782],[45.812,-122.793],[45.848,-122.785],[45.865,-122.785],[45.874,-122.794],[45.903,-122.808],[45.95,-122.81]]},
+  {w:4, pts:[[45.820,-122.745],[45.780,-122.752],[45.745,-122.752],[45.705,-122.742],[45.690,-122.738]]},
+  {w:4, pts:[[45.862,-122.786],[45.874,-122.762],[45.886,-122.745],[45.900,-122.732],[45.912,-122.705],[45.925,-122.670],[45.940,-122.62]]},
+  {w:3, pts:[[45.860,-122.770],[45.850,-122.725],[45.838,-122.690],[45.826,-122.655],[45.816,-122.610],[45.812,-122.560],[45.818,-122.500],[45.822,-122.440]]},
+  {w:2.5, pts:[[45.711,-122.735],[45.710,-122.700],[45.716,-122.666],[45.722,-122.630],[45.731,-122.592],[45.742,-122.548],[45.756,-122.515]]},
+  {w:3, pts:[[45.582,-122.395],[45.592,-122.36],[45.605,-122.31]]}
+];
+const LAKE = [[45.691,-122.746],[45.689,-122.726],[45.677,-122.714],[45.662,-122.719],[45.657,-122.737],[45.668,-122.756],[45.684,-122.757]];
+const HWY = [
+  {ref:"I-5", at:[45.705,-122.655], pts:[[45.595,-122.684],[45.610,-122.680],[45.622,-122.673],[45.635,-122.663],[45.653,-122.663],[45.673,-122.665],[45.692,-122.661],[45.716,-122.654],[45.750,-122.663],[45.778,-122.672],[45.811,-122.684],[45.847,-122.701],[45.871,-122.710],[45.905,-122.742],[45.932,-122.759],[45.960,-122.79]]},
+  {ref:"I-205", at:[45.672,-122.583], pts:[[45.578,-122.543],[45.602,-122.551],[45.618,-122.558],[45.637,-122.562],[45.650,-122.566],[45.666,-122.578],[45.683,-122.594],[45.696,-122.612],[45.711,-122.639],[45.721,-122.653],[45.728,-122.656]]},
+  {ref:"SR-14", at:[45.611,-122.583], pts:[[45.621,-122.673],[45.618,-122.656],[45.618,-122.625],[45.613,-122.597],[45.607,-122.567],[45.601,-122.541],[45.594,-122.511],[45.586,-122.470],[45.583,-122.430],[45.585,-122.390]]},
+  {ref:"SR-500", at:[45.651,-122.620], pts:[[45.647,-122.662],[45.651,-122.655],[45.646,-122.640],[45.648,-122.617],[45.654,-122.588],[45.657,-122.570],[45.662,-122.559],[45.666,-122.553]]},
+  {ref:"SR-503", at:[45.725,-122.553], pts:[[45.666,-122.553],[45.700,-122.553],[45.720,-122.553],[45.740,-122.552],[45.752,-122.548],[45.770,-122.547],[45.781,-122.547],[45.800,-122.548]]},
+  {ref:"SR-502", at:[45.780,-122.610], pts:[[45.778,-122.672],[45.780,-122.640],[45.780,-122.600],[45.781,-122.547]]}
+];
+const ROADS = [
+  [[45.623,-122.660],[45.621,-122.602],[45.623,-122.586],[45.621,-122.555],[45.620,-122.531],[45.617,-122.515],[45.616,-122.476]],
+  [[45.679,-122.664],[45.679,-122.616],[45.682,-122.590],[45.683,-122.553],[45.683,-122.505]]
+];
+const CITIES = [["Vancouver",45.628,-122.682],["Hazel Dell",45.690,-122.676],["Salmon Creek",45.716,-122.684],["Orchards",45.668,-122.540],["Battle Ground",45.800,-122.520],["Ridgefield",45.816,-122.730],["Camas",45.596,-122.405],["Brush Prairie",45.733,-122.528],["Woodland",45.912,-122.760],["Hockinson",45.738,-122.488],["Felida",45.712,-122.712],["Portland, OR",45.562,-122.660]];
+
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {minZoom:9, maxZoom:19, attribution:""}).addTo(map);
+function drawBase(){}
+PLACES.forEach(p => L.marker([p.lat,p.lng], {keyboard:false, zIndexOffset:900, icon:L.divIcon({className:"", html:`<span class="place ${p.pos}"><b>${p.short}</b><span>${p.name}</span></span>`, iconSize:[22,22], iconAnchor:[11,11]})}).bindTooltip(p.addr, {direction:"top", offset:[0,-10]}).addTo(map));
+const attr = document.createElement("div"); attr.className = "attr"; attr.innerHTML = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'; $("#map").appendChild(attr);
+map.fitBounds([[45.60,-122.69],[45.80,-122.50]]);
+// re-tint base map when the theme changes
+const mq = matchMedia("(prefers-color-scheme: dark)");
+function retheme(){ drawBase(); renderMarkers(); }
+mq.addEventListener && mq.addEventListener("change", () => setTimeout(retheme, 50));
+new MutationObserver(() => setTimeout(retheme, 50)).observe(document.documentElement, {attributes:true, attributeFilter:["data-theme"]});
+
+const markers = {};
+function statusColor(h){
+  const vs = votesFor(h.id);
+  if (vs.filter(x=>x.v==="yes").length >= 2) return {ring:tok("--yes"), w:4};
+  if (vs.some(x=>x.v==="yes")) return {ring:tok("--yes"), w:2.5};
+  if (vs.some(x=>x.v==="maybe")) return {ring:tok("--maybe"), w:2.5};
+  return {ring:tok("--surface"), w:1.5};
+}
+function renderMarkers(){
+  const vis = new Set(visible().map(h=>h.id));
+  HOMES.forEach(h => {
+    if (markers[h.id]) { map.removeLayer(markers[h.id]); delete markers[h.id]; }
+    if (!vis.has(h.id)) return;
+    const st = statusColor(h), sel = selected === h.id;
+    const m = L.circleMarker([h.lat,h.lng], {radius: sel ? 10 : 7, color: sel ? tok("--ink") : st.ring, weight: sel ? 3 : st.w,
+      fillColor: tok("--"+h.cat), fillOpacity: 1});
+    m.bindTooltip(`${h.a} · ${money(h.p)}`, {direction:"top", offset:[0,-6]});
+    m.on("click", () => onMarker(h));
+    m.addTo(map); markers[h.id] = m;
+  });
+  if (selected && markers[selected]) markers[selected].bringToFront();
+}
+function onMarker(h){
+  const near = visible().filter(o => Math.abs(o.lat-h.lat) < 0.0006 && Math.abs(o.lng-h.lng) < 0.0008);
+  if (near.length > 1) { clusterIds = near.map(o=>o.id); selected = null; renderAll(); return; }
+  select(h.id, false);
+}
+
+/* ---------- list ---------- */
+function voteBadges(id){
+  const vs = votesFor(id); if (!vs.length) return "";
+  return `<span class="votes">` + vs.map(x => `<span class="vb ${x.v}" data-u="${x.u}">${initial(x.u)}</span>`).join("") + `</span>`;
+}
+function initial(u){ const n = names[u] && names[u].name; return n ? n.trim()[0].toUpperCase() : (u === myId ? "Me" : "?"); }
+function itemHTML(h){
+  const p = pay(h), over = p > S.target;
+  return `<button class="item${selected===h.id?" sel":""}" data-id="${h.id}" type="button">
+    <i class="dot ${h.cat}"></i>
+    <span class="addr"></span>
+    <span class="price num">${money(h.p)}</span>
+    <span class="meta">${h.t} · ${h.bd} bd · ${h.ba} ba · ${h.sf.toLocaleString()} sq ft${voteBadges(h.id)}</span>
+    <span class="pay num">Est. <b class="${over?"over":""}">${money(p)}/mo</b> · J ${fmtMi(h.d.jw)} · M ${fmtMi(h.d.mw)} · Daycare ${fmtMi(h.d.dc)}</span>
+  </button>`;
+}
+function renderList(){
+  const ul = $("#list"); let list = visible();
+  if (clusterIds) list = list.filter(h => clusterIds.includes(h.id));
+  ul.innerHTML = (clusterIds ? `<li><div style="padding:10px 12px" class="small">${list.length} homes at this spot. <button class="back" type="button" id="clearCluster">Show all</button></div></li>` : "")
+    + list.map(h => `<li>${itemHTML(h)}</li>`).join("")
+    + (list.length ? "" : `<li><div style="padding:16px 12px" class="small">No homes match these filters.</div></li>`);
+  ul.querySelectorAll(".item").forEach(b => { const h = HOMES.find(x=>x.id===b.dataset.id); b.querySelector(".addr").textContent = `${h.a}, ${h.c}`; b.onclick = () => select(h.id, true); });
+  const cc = $("#clearCluster"); if (cc) cc.onclick = () => { clusterIds = null; renderAll(); };
+  $("#count").textContent = `${visible().length} of ${HOMES.length} homes`;
+}
+
+/* ---------- detail ---------- */
+let noteTimer = null;
+function select(id, pan){
+  selected = id; clusterIds = null;
+  const h = HOMES.find(x=>x.id===id);
+  if (pan) map.panTo([h.lat,h.lng], {animate:true});
+  renderAll();
+}
+function renderDetail(){
+  const d = $("#detail"), list = $("#list");
+  if (!selected) { d.hidden = true; list.hidden = false; return; }
+  const h = HOMES.find(x=>x.id===selected); d.hidden = false; list.hidden = true;
+  const pr = monthly(h, primaryRate(h)), p7 = monthly(h, S.rate);
+  const mine = myVote(h.id) || {};
+  const others = votesFor(h.id).filter(x => x.u !== myId);
+  d.innerHTML = `
+    <button class="back" type="button" id="back">← Back to list</button>
+    <h2 class="dh" id="dAddr"></h2>
+    <p class="dsub"><span class="dot ${h.cat}"></span> ${CAT_LABEL[h.cat]} · from doc ${h.doc}</p>
+    <p class="dprice num">${money(h.p)}</p>
+    <dl class="facts num">
+      <div><dt>Type</dt><dd>${h.t}</dd></div>
+      <div><dt>Beds · baths</dt><dd>${h.bd} · ${h.ba}</dd></div>
+      <div><dt>Square feet</dt><dd>${h.sf.toLocaleString()}</dd></div>
+      <div><dt>Built</dt><dd>${h.yr}</dd></div>
+      <div><dt>Lot size</dt><dd>${h.lot || "Not listed"}</dd></div>
+      <div><dt>HOA</dt><dd>${h.hoa ? money(h.hoa)+"/mo" : "None listed"}</dd></div>
+      <div style="grid-column:1/-1"><dt>School district</dt><dd>${h.sd}</dd></div>
+    </dl>
+    <div class="box num">
+      <h3>Estimated monthly payment</h3>
+      <div class="payline"><span>${h.cat==="builder" ? "With builder rate ("+S.brate+"%)" : "At "+S.rate+"%"}</span><span class="big ${pr>S.target?"over":""}">${money(pr)}</span></div>
+      ${h.cat==="builder" ? `<div class="payline small"><span>Without the incentive (${S.rate}%)</span><span class="${p7>S.target?"over":""}">${money(p7)}</span></div>` : ""}
+      <div class="small">${S.down}% down, tax, insurance, PMI${h.hoa?" and HOA":""} included. Target ${money(S.target)}/mo.</div>
+    </div>
+    <div class="box num">
+      <h3>Straight-line distance</h3>
+      <div class="dist">${PLACES.map(p => `<span class="pl">${p.short}</span><span>${p.name}</span><b>${fmtMi(h.d[p.id])}</b>`).join("")}</div>
+    </div>
+    <p class="note" id="dNote"></p>
+    <a class="link" href="${h.url}" target="_blank" rel="noopener">Open listing and photos ↗</a>
+    <div class="box">
+      <h3>Your pick</h3>
+      <div class="vote" role="group" aria-label="Your pick">
+        ${["yes","maybe","no"].map(v => `<button type="button" class="${v}" data-v="${v}" aria-pressed="${mine.v===v}" ${canWrite?"":"disabled"}>${v==="yes"?"Yes":v==="maybe"?"Maybe":"No"}</button>`).join("")}
+      </div>
+      <label class="small" for="myNote">Your note</label>
+      <textarea id="myNote" ${canWrite?"":"disabled"} placeholder="What stood out?"></textarea>
+      <div id="others"></div>
+      ${canWrite ? "" : `<p class="small">${db ? "Choose who is picking at the top of the page to save picks." : "Saving is not set up yet."}</p>`}
+    </div>`;
+  $("#dAddr").textContent = `${h.a}, ${h.c} ${h.z}`;
+  $("#dNote").textContent = h.note || "";
+  const ta = $("#myNote"); ta.value = mine.n || "";
+  ta.oninput = () => { clearTimeout(noteTimer); noteTimer = setTimeout(() => setPick(h.id, {n: ta.value}), 900); };
+  d.querySelectorAll(".vote button").forEach(b => b.onclick = () => { const v = (mine.v === b.dataset.v) ? "" : b.dataset.v; setPick(h.id, {v}); });
+  $("#back").onclick = () => { selected = null; renderAll(); };
+  const ob = $("#others");
+  if (others.length) {
+    ob.innerHTML = others.map(o => `<div class="other"><img alt="" data-u="${o.u}"><div><b class="nm" data-u="${o.u}"></b> <span class="vb ${o.v}">${o.v}</span><div class="small on" data-u="${o.u}"></div></div></div>`).join("");
+    others.forEach(o => {
+      const p = names[o.u] || {}; ob.querySelector(`img[data-u="${o.u}"]`).remove();
+      ob.querySelector(`.nm[data-u="${o.u}"]`).textContent = p.name || "Someone";
+      ob.querySelector(`.on[data-u="${o.u}"]`).textContent = o.n;
+    });
+  }
+}
+function renderAll(){ renderMarkers(); renderList(); renderDetail(); }
+
+/* ---------- writes ---------- */
+let writeChain = Promise.resolve(), pending = 0;
+function setPick(id, patch){
+  if (!canWrite) return;
+  const cur = {...(picks[myId] || {})};
+  const entry = {...(cur[id] || {}), ...patch};
+  if (!entry.v && !entry.n) delete cur[id]; else cur[id] = entry;
+  picks[myId] = cur;
+  if ("v" in patch) renderAll();
+  const body = JSON.stringify({who: myId, id, v: entry.v || "", n: entry.n || ""});
+  pending++;
+  writeChain = writeChain
+    .then(() => fetch(API, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body}))
+    .then(r => r.json()).then(j => { if (j.error) throw new Error(j.error); $("#status").hidden = true; })
+    .catch(() => { const s = $("#status"); s.hidden = false; s.textContent = "Couldn't save just now. Try again in a moment."; })
+    .finally(() => { pending--; });
+}
+
+/* ---------- boot ---------- */
+["#fType","#fBeds","#fSort","#fBudget","#fHideNo"].forEach(s => $(s).addEventListener("change", () => { clusterIds = null; renderAll(); }));
+document.querySelectorAll("#statusChips .chip").forEach(c => c.onclick = () => {
+  status = c.dataset.s; document.querySelectorAll("#statusChips .chip").forEach(x => x.setAttribute("aria-pressed", x===c)); clusterIds = null; renderAll();
+});
+const dlg = $("#settings");
+function fillSet(){ $("#sRate").value=S.rate; $("#sBRate").value=S.brate; $("#sDown").value=S.down; $("#sTax").value=S.tax; $("#sIns").value=S.ins; $("#sTarget").value=S.target; }
+$("#openSettings").onclick = () => { fillSet(); dlg.showModal ? dlg.showModal() : dlg.setAttribute("open",""); };
+$("#saveSet").onclick = () => { const n = id => parseFloat($(id).value);
+  S = {rate:n("#sRate")||DEFAULTS.rate, brate:n("#sBRate")||DEFAULTS.brate, down:Math.max(3,n("#sDown")||3), tax:isNaN(n("#sTax"))?DEFAULTS.tax:n("#sTax"), ins:isNaN(n("#sIns"))?DEFAULTS.ins:n("#sIns"), target:n("#sTarget")||DEFAULTS.target};
+  saveSettings(); dlg.close ? dlg.close() : dlg.removeAttribute("open"); renderAll(); };
+$("#resetSet").onclick = () => { S = {...DEFAULTS}; fillSet(); };
+renderAll();
+
+$("#who").value = myId || "";
+$("#who").onchange = e => { myId = PEOPLE[e.target.value] ? e.target.value : null; canWrite = db && !!myId;
+  try { myId ? localStorage.setItem("hs-who", myId) : localStorage.removeItem("hs-who"); } catch(err) {} renderAll(); };
+
+async function loadPicks(){
+  const st = $("#status");
+  if (!db) { st.hidden = false; st.textContent = "Shared picks are not connected yet."; return; }
+  if (pending) return;
+  try {
+    const r = await fetch(API, {cache:"no-store"}); const j = await r.json();
+    if (pending) return;
+    picks = j.picks || {}; st.hidden = true;
+    const n = Object.values(picks).filter(m => Object.keys(m).length).length;
+    $("#sub").textContent = n ? `Shared shortlist · ${n === 1 ? "1 person" : n+" people"} picking` : "Shared shortlist · tap a home and pick Yes, Maybe or No";
+    if (document.activeElement && document.activeElement.id === "myNote") { renderMarkers(); renderList(); } else renderAll();
+  } catch(e) { st.hidden = false; st.textContent = "The shared shortlist can't be reached right now. Picks shown may be out of date."; }
+}
+loadPicks();
+setInterval(() => { if (!document.hidden) loadPicks(); }, 20000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) loadPicks(); });
+</script>
+
+</html>
